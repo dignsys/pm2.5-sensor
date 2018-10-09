@@ -1,2 +1,2 @@
 # pm2.5-sensor
-tizen iot application, pm2.5 sensor
+Tizen IoT Application, PM2.5 sensor 
