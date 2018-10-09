@@ -1,0 +1,138 @@
+{
+  "device": [
+    {
+      "specification": {
+        "device": {
+          "deviceType": "x.wwst.d.airpurifier",
+          "deviceName": "dust-sensor",
+          "specVersion": "core.1.1.0",
+          "dataModelVersion": "res.1.1.0"
+        },
+        "platform": {
+          "manufacturerName": "*** YOUR DEVICE NAME ***",
+          "manufacturerUrl": "http://www.samsung.com",
+          "manufacturingDate": "",
+          "modelNumber": "0x0400",
+          "platformVersion": "",
+          "osVersion": "",
+          "hardwareVersion": "PM2.5 sensor",
+          "firmwareVersion": "Virtual Device_0824",
+          "vendorId": "*** YOUR VENDOR ID ***"
+        }
+      },
+      "resources": {
+        "single": [
+          {
+            "uri": "/capability/switch/main/0",
+            "types": [
+              "x.com.st.powerswitch"
+            ],
+            "interfaces": [
+              "oic.if.a",
+              "oic.if.baseline"
+            ],
+            "policy": 3
+          },
+          {
+            "uri": "/capability/fanSpeed/main/0",
+            "types": [
+              "x.com.st.fanspeed"
+            ],
+            "interfaces": [
+              "oic.if.a",
+              "oic.if.s",
+              "oic.if.baseline"
+            ],
+            "policy": 3
+          },
+          {
+            "uri": "/capability/dustSensor/main/0",
+            "types": [
+              "x.com.st.dustlevel"
+            ],
+            "interfaces": [
+              "oic.if.s",
+              "oic.if.baseline"
+            ],
+            "policy": 3
+          }
+        ]
+      }
+    }
+  ],
+  "resourceTypes": [
+    {
+      "type": "x.com.st.powerswitch",
+      "properties": [
+        {
+          "key": "power",
+          "type": 3,
+          "mandatory": true,
+          "rw": 3
+        }
+      ]
+    },
+    {
+      "type": "x.com.st.fanspeed",
+      "properties": [
+        {
+          "key": "range",
+          "type": 6,
+          "mandatory": true,
+          "rw": 1
+        },
+        {
+          "key": "step",
+          "type": 1,
+          "mandatory": true,
+          "rw": 1
+        },
+        {
+          "key": "fanSpeed",
+          "type": 1,
+          "mandatory": true,
+          "rw": 3
+        }
+      ]
+    },
+    {
+      "type": "x.com.st.dustlevel",
+      "properties": [
+        {
+          "key": "dustLevel",
+          "type": 2,
+          "mandatory": true,
+          "rw": 1
+        },
+        {
+          "key": "fineDustLevel",
+          "type": 2,
+          "mandatory": true,
+          "rw": 1
+        }
+      ]
+    }
+  ],
+  "configuration": {
+    "easySetup": {
+      "connectivity": {
+        "type": 1,
+        "softAP": {
+          "setupId": "001",
+          "artik": false
+        }
+      },
+      "ownershipTransferMethod": 2
+    },
+    "wifi": {
+      "interfaces": 15,
+      "frequency": 1
+    },
+    "filePath": {
+      "svrdb": "artikserversecured.dat",
+      "provisioning": "provisioning.dat",
+      "certificate": "certificate.pem",
+      "privateKey": "privatekey.der"
+    }
+  }
+}
