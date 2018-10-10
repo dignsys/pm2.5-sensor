@@ -14,24 +14,36 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdbool.h>
 #include "st_things.h"
 #include "log.h"
 
+static const char *PROP_DUSTLEVEL = "dustLevel";
+static const char *PROP_FINEDUSTLEVEL = "fineDustLevel";
 
-static const char* PROP_DUSTLEVEL = "dustLevel";
-static const char* PROP_FINEDUSTLEVEL = "fineDustLevel";
+extern void get_dust_level(uint32_t *dust_level);
+extern void get_fine_dust_level(uint32_t *fine_dust_level);
 
-bool handle_get_request_on_resource_capability_dustsensor_main_0(st_things_get_request_message_s* req_msg, st_things_representation_s* resp_rep)
+/*
+ * Dust Sensor capability attributes:
+ *   fineDustLevel: PM 2.5
+ *   dustLevel: PM 10
+ */
+
+bool handle_get_request_on_resource_capability_dustsensor(st_things_get_request_message_s* req_msg, st_things_representation_s* resp_rep)
 {
-    DBG("Received a GET request on %s\n", req_msg->resource_uri);
+	// A value representation of PM 10, micrograms per cubic meter
+	uint32_t dust_level;
 
-    if (req_msg->has_property_key(req_msg, PROP_DUSTLEVEL)) {
-        // TODO: Write your implementation in this section.
-    }
-    if (req_msg->has_property_key(req_msg, PROP_FINEDUSTLEVEL)) {
-        // TODO: Write your implementation in this section.
-    }
-    return false;  // FIXME: Modify this line with the appropriate return value.
+	// A value representation of PM 2.5, micrograms per cubic meter
+	uint32_t fine_dust_level;
+
+	if (req_msg->has_property_key(req_msg, PROP_DUSTLEVEL)) {
+		get_dust_level(&dust_level);
+		resp_rep->set_int_value(resp_rep, PROP_DUSTLEVEL, dust_level);
+	}
+	if (req_msg->has_property_key(req_msg, PROP_FINEDUSTLEVEL)) {
+		get_fine_dust_level(&fine_dust_level);
+		resp_rep->set_int_value(resp_rep, PROP_FINEDUSTLEVEL, fine_dust_level);
+	}
+    return true;
 }

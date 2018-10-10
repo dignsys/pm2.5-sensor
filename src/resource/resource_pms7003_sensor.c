@@ -60,11 +60,7 @@ static _pms7003_protocol_t pms7003_protocol;
 static bool initialized = false;
 static peripheral_uart_h g_uart_h;
 
-//extern void set_sensor_value(_pms7003_protocol_t pms7003_protocol);
-void set_sensor_value(_pms7003_protocol_t pms7003_protocol)
-{
-
-}
+extern void set_sensor_value(_pms7003_protocol_t pms7003_protocol);
 
 /*
  * open UART port and set UART handle resource

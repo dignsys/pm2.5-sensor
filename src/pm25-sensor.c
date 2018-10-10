@@ -22,6 +22,11 @@
 #include "log.h"
 #include "resource/resource_pms7003_sensor.h"
 
+#define _DEBUG_PRINT_
+#ifdef _DEBUG_PRINT_
+#include <sys/time.h>
+#endif
+
 #define EVENT_INTERVAL_SECOND	(1.0f)	// sensor event timer : 1 second interval
 #define JSON_PATH "device_def.json"
 
@@ -31,6 +36,7 @@ static const char *RES_CAPABILITY_DUSTSENSOR_MAIN_0 = "/capability/dustSensor/ma
 
 Ecore_Timer *sensor_event_timer = NULL;
 pthread_mutex_t  mutex_lock = PTHREAD_MUTEX_INITIALIZER;
+static bool g_switch_status;
 
 #define MUTEX_LOCK		pthread_mutex_lock(&mutex_lock)
 #define MUTEX_UNLOCK	pthread_mutex_unlock(&mutex_lock)
@@ -40,11 +46,11 @@ _concentration_unit_t	standard_particle;	// CF=1，standard particle
 _concentration_unit_t	atmospheric_env;	// under atmospheric environment
 
 /* get and set request handlers */
-extern bool handle_get_request_on_resource_capability_switch_main_0(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
-extern bool handle_set_request_on_resource_capability_switch_main_0(st_things_set_request_message_s *req_msg, st_things_representation_s *resp_rep);
+extern bool handle_get_request_on_resource_capability_switch(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
+extern bool handle_set_request_on_resource_capability_switch(st_things_set_request_message_s *req_msg, st_things_representation_s *resp_rep);
 extern bool handle_get_request_on_resource_capability_fanspeed_main_0(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
 extern bool handle_set_request_on_resource_capability_fanspeed_main_0(st_things_set_request_message_s *req_msg, st_things_representation_s *resp_rep);
-extern bool handle_get_request_on_resource_capability_dustsensor_main_0(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
+extern bool handle_get_request_on_resource_capability_dustsensor(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
 
 /* resource pms7003 functions */
 extern bool resource_pms7003_init(void);
@@ -60,6 +66,57 @@ static void _deinit_mutex(void)
 {
 	INFO("deinit_mutex...");
 	pthread_mutex_destroy(&mutex_lock);
+}
+
+static bool _get_switch_status(void)
+{
+	bool status = false;
+
+	MUTEX_LOCK;
+	status = g_switch_status;
+	MUTEX_UNLOCK;
+
+	return status;
+}
+
+void set_switch_status(bool status)
+{
+	MUTEX_LOCK;
+	g_switch_status = status;
+	MUTEX_UNLOCK;
+
+}
+
+/*
+ * dust sensor data set
+ * PM2.5 level
+ *  0 ~ 15 ug/m3 : Good
+ * 16 ~ 35 ug/m3 : Moderate
+ * 36 ~ 75 ug/m3 : PoorM
+ * 76 ~    ug/m3 : Very Poor
+ *
+ * PM10 level
+ *  0 ~ 30  ug/m3 : Good
+ * 31 ~ 80  ug/m3 : Moderate
+ * 81 ~ 150 ug/m3 : Poor
+ * 151 ~    ug/m3 : Very Poor
+ */
+
+void set_sensor_value(_pms7003_protocol_t pms7003_protocol)
+{
+	uint32_t pm1_0, pm2_5, pm10;
+
+	MUTEX_LOCK;
+	pm1_0 = standard_particle.PM1_0 = pms7003_protocol.standard_particle.PM1_0;
+	pm2_5 = standard_particle.PM2_5 = pms7003_protocol.standard_particle.PM2_5;
+	pm10  = standard_particle.PM10  = pms7003_protocol.standard_particle.PM10;
+	MUTEX_UNLOCK;
+
+#ifdef _DEBUG_PRINT_
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	INFO("[%d.%06d] [ PM1.0: %d ug/m3 | PM2.5: %d ug/m3 | PM10: %d ug/m3 ]", tv.tv_sec, tv.tv_usec, pm1_0, pm2_5, pm10);
+#endif
 }
 
 // get PM10 level
@@ -90,8 +147,8 @@ static Eina_Bool _sensor_interval_event_cb(void *data)
 		return ECORE_CALLBACK_CANCEL;
 	} else {
 		#ifndef _DEBUG_PRINT_
-		struct timeval __tv;
-		gettimeofday(&__tv, NULL);
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
 
 		// get sensor value from PMS7003 module
 		uint32_t dust = 0;
@@ -99,8 +156,15 @@ static Eina_Bool _sensor_interval_event_cb(void *data)
 		get_dust_level(&dust);			// PM10 level
 		get_fine_dust_level(&fine);		// PM2.5 level
 
-		INFO("[%d.%06d] dustLevel : %d ug/m3, fineDustLevel : %d ug/m3", __tv.tv_sec, __tv.tv_usec, dust, fine);
+		INFO("[%d.%06d] dustLevel : %d ug/m3, fineDustLevel : %d ug/m3", tv.tv_sec, tv.tv_usec, dust, fine);
 		#endif
+
+		// send notification when switch is on state.
+		switch_status = _get_switch_status();
+		if (switch_status) {
+			// send notification to cloud server
+			st_things_notify_observers(RES_CAPABILITY_DUSTSENSOR_MAIN_0);
+		}
 	}
 
 	// reset next event timer
@@ -123,13 +187,13 @@ bool handle_get_request(st_things_get_request_message_s *req_msg, st_things_repr
 	DBG("resource_uri [%s]", req_msg->resource_uri);
 
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_SWITCH_MAIN_0)) {
-		return handle_get_request_on_resource_capability_switch_main_0(req_msg, resp_rep);
+		return handle_get_request_on_resource_capability_switch(req_msg, resp_rep);
 	}
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_FANSPEED_MAIN_0)) {
 		return handle_get_request_on_resource_capability_fanspeed_main_0(req_msg, resp_rep);
 	}
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_DUSTSENSOR_MAIN_0)) {
-		return handle_get_request_on_resource_capability_dustsensor_main_0(req_msg, resp_rep);
+		return handle_get_request_on_resource_capability_dustsensor(req_msg, resp_rep);
 	}
 
 	ERR("not supported uri");
@@ -142,7 +206,7 @@ bool handle_set_request(st_things_set_request_message_s *req_msg, st_things_repr
 	DBG("resource_uri [%s]", req_msg->resource_uri);
 
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_SWITCH_MAIN_0)) {
-		return handle_set_request_on_resource_capability_switch_main_0(req_msg, resp_rep);
+		return handle_set_request_on_resource_capability_switch(req_msg, resp_rep);
 	}
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_FANSPEED_MAIN_0)) {
 		return handle_set_request_on_resource_capability_fanspeed_main_0(req_msg, resp_rep);
