@@ -30,6 +30,11 @@
 #define EVENT_INTERVAL_SECOND	(1.0f)	// sensor event timer : 1 second interval
 #define JSON_PATH "device_def.json"
 
+#define FAN_SPEED_MAX      0x4
+#define FAN_SPEED_HIGH     0x3
+#define FAN_SPEED_MEDIUM   0x2
+#define FAN_SPEED_LOW      0x1
+
 static const char *RES_CAPABILITY_SWITCH_MAIN_0 = "/capability/switch/main/0";
 static const char *RES_CAPABILITY_FANSPEED_MAIN_0 = "/capability/fanSpeed/main/0";
 static const char *RES_CAPABILITY_DUSTSENSOR_MAIN_0 = "/capability/dustSensor/main/0";
@@ -37,6 +42,7 @@ static const char *RES_CAPABILITY_DUSTSENSOR_MAIN_0 = "/capability/dustSensor/ma
 Ecore_Timer *sensor_event_timer = NULL;
 pthread_mutex_t  mutex_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool g_switch_status;
+static uint32_t g_fan_speed = FAN_SPEED_LOW;
 
 #define MUTEX_LOCK		pthread_mutex_lock(&mutex_lock)
 #define MUTEX_UNLOCK	pthread_mutex_unlock(&mutex_lock)
@@ -48,8 +54,8 @@ _concentration_unit_t	atmospheric_env;	// under atmospheric environment
 /* get and set request handlers */
 extern bool handle_get_request_on_resource_capability_switch(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
 extern bool handle_set_request_on_resource_capability_switch(st_things_set_request_message_s *req_msg, st_things_representation_s *resp_rep);
-extern bool handle_get_request_on_resource_capability_fanspeed_main_0(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
-extern bool handle_set_request_on_resource_capability_fanspeed_main_0(st_things_set_request_message_s *req_msg, st_things_representation_s *resp_rep);
+extern bool handle_get_request_on_resource_capability_fanspeed(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
+extern bool handle_set_request_on_resource_capability_fanspeed(st_things_set_request_message_s *req_msg, st_things_representation_s *resp_rep);
 extern bool handle_get_request_on_resource_capability_dustsensor(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep);
 
 /* resource pms7003 functions */
@@ -88,11 +94,31 @@ void set_switch_status(bool status)
 }
 
 /*
+ * set fan speed
+ */
+void set_fan_speed(uint32_t fan_speed)
+{
+	MUTEX_LOCK;
+	g_fan_speed = fan_speed;
+	MUTEX_UNLOCK;
+
+	INFO("set fan speed : 0x%x", fan_speed);
+	st_things_notify_observers(RES_CAPABILITY_FANSPEED_MAIN_0);
+}
+
+void get_fan_speed(uint32_t *fan_speed)
+{
+	MUTEX_LOCK;
+	*fan_speed  = g_fan_speed;
+	MUTEX_UNLOCK;
+}
+
+/*
  * dust sensor data set
  * PM2.5 level
  *  0 ~ 15 ug/m3 : Good
  * 16 ~ 35 ug/m3 : Moderate
- * 36 ~ 75 ug/m3 : PoorM
+ * 36 ~ 75 ug/m3 : Poor
  * 76 ~    ug/m3 : Very Poor
  *
  * PM10 level
@@ -105,12 +131,33 @@ void set_switch_status(bool status)
 void set_sensor_value(_pms7003_protocol_t pms7003_protocol)
 {
 	uint32_t pm1_0, pm2_5, pm10;
+	uint32_t fan_speed;
 
 	MUTEX_LOCK;
 	pm1_0 = standard_particle.PM1_0 = pms7003_protocol.standard_particle.PM1_0;
 	pm2_5 = standard_particle.PM2_5 = pms7003_protocol.standard_particle.PM2_5;
 	pm10  = standard_particle.PM10  = pms7003_protocol.standard_particle.PM10;
 	MUTEX_UNLOCK;
+
+	/*
+	 * set fan speed : (manual / auto)
+	 * Manual setting : 0x01 ~ 0x04
+	 * Auto   setting : 0x11 ~ 0x14
+	 * If Manual setting is enabled, then do not update fan speed
+	 */
+
+	get_fan_speed(&fan_speed);
+	// setting fan speed (Auto)
+	if (fan_speed >= 0x11 && fan_speed >= 0x14) {
+		if ((pm10 >= 76) && (fan_speed != FAN_SPEED_MAX))
+			set_fan_speed(FAN_SPEED_MAX);
+		else if ((pm10 <= 75) && (pm10 >= 36) && (fan_speed != FAN_SPEED_HIGH))
+			set_fan_speed(FAN_SPEED_HIGH);
+		else if ((pm10 <= 35) && (pm10 >= 16) && (fan_speed != FAN_SPEED_MEDIUM))
+			set_fan_speed(FAN_SPEED_MEDIUM);
+		else if ((pm10 <= 15) && (fan_speed != FAN_SPEED_LOW))
+			set_fan_speed(FAN_SPEED_LOW);
+	}
 
 #ifdef _DEBUG_PRINT_
 	struct timeval tv;
@@ -184,13 +231,13 @@ static void _clear_timer_resource(void)
 /* handle : for getting request on resources */
 bool handle_get_request(st_things_get_request_message_s *req_msg, st_things_representation_s *resp_rep)
 {
-	DBG("resource_uri [%s]", req_msg->resource_uri);
+	//DBG("resource_uri [%s]", req_msg->resource_uri);
 
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_SWITCH_MAIN_0)) {
 		return handle_get_request_on_resource_capability_switch(req_msg, resp_rep);
 	}
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_FANSPEED_MAIN_0)) {
-		return handle_get_request_on_resource_capability_fanspeed_main_0(req_msg, resp_rep);
+		return handle_get_request_on_resource_capability_fanspeed(req_msg, resp_rep);
 	}
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_DUSTSENSOR_MAIN_0)) {
 		return handle_get_request_on_resource_capability_dustsensor(req_msg, resp_rep);
@@ -209,7 +256,7 @@ bool handle_set_request(st_things_set_request_message_s *req_msg, st_things_repr
 		return handle_set_request_on_resource_capability_switch(req_msg, resp_rep);
 	}
 	if (0 == strcmp(req_msg->resource_uri, RES_CAPABILITY_FANSPEED_MAIN_0)) {
-		return handle_set_request_on_resource_capability_fanspeed_main_0(req_msg, resp_rep);
+		return handle_set_request_on_resource_capability_fanspeed(req_msg, resp_rep);
 	}
 
 	ERR("not supported uri");

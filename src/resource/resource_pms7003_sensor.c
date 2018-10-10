@@ -273,7 +273,9 @@ bool resource_pms7003_read(void)
 			case 4:
 				pms7003_protocol.frame_len = val;
 				frame_len = val + byte_position;
+				#ifdef DEBUG
 				INFO("frame_len: [%d]", frame_len);
+				#endif
 				break;
 			case 6:
 				pms7003_protocol.standard_particle.PM1_0 = val;
