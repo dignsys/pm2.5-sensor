@@ -1,0 +1,11 @@
+/Debug/
+/SA_Report/
+.cproject
+.exportMap
+.package-stamp
+.project
+.smartthingsapp
+.tproject
+/.sign/
+/res/certificate.pem
+/res/privatekey.der
