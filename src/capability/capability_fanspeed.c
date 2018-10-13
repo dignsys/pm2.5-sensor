@@ -30,7 +30,7 @@ bool handle_get_request_on_resource_capability_fanspeed(st_things_get_request_me
 
 	if (req_msg->has_property_key(req_msg, PROP_FANSPEED)) {
 		get_fan_speed(&fan_speed);
-		INFO("Received a GET fan_speed [%d]", fan_speed);
+		INFO("Received a GET fan_speed [0x%x]", fan_speed);
 		resp_rep->set_int_value(resp_rep, PROP_FANSPEED, fan_speed);
 	}
 	return true;
@@ -43,7 +43,7 @@ bool handle_set_request_on_resource_capability_fanspeed(st_things_set_request_me
 
 	req_msg->rep->get_int_value(req_msg->rep, PROP_FANSPEED, &speed);
 
-	INFO("Received a SET fan speed [%d]", speed);
+	INFO("Received a SET fan speed [0x%x]", speed);
 	resp_rep->set_int_value(resp_rep, PROP_FANSPEED, speed);
 	set_fan_speed(speed);
 

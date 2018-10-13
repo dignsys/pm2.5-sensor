@@ -30,10 +30,20 @@
 #define EVENT_INTERVAL_SECOND	(1.0f)	// sensor event timer : 1 second interval
 #define JSON_PATH "device_def.json"
 
-#define FAN_SPEED_MAX      0x4
-#define FAN_SPEED_HIGH     0x3
-#define FAN_SPEED_MEDIUM   0x2
-#define FAN_SPEED_LOW      0x1
+#define FINEDUST_LEVEL_PM2_5_GOOD       15
+#define FINEDUST_LEVEL_PM2_5_NORMAL     25
+#define FINEDUST_LEVEL_PM2_5_POOR       50
+//#define FINEDUST_LEVEL_PM2_5_VERYPOOR 51
+
+#define MANUAL_FAN_SPEED_HIGH           0x04
+#define MANUAL_FAN_SPEED_MEDIUM         0x03
+#define MANUAL_FAN_SPEED_LOW            0x02
+#define MANUAL_FAN_SPEED_OFF            0x01
+
+#define FAN_SPEED_HIGH                  0x14
+#define FAN_SPEED_MEDIUM                0x13
+#define FAN_SPEED_LOW                   0x12
+#define FAN_SPEED_OFF                   0x11
 
 static const char *RES_CAPABILITY_SWITCH_MAIN_0 = "/capability/switch/main/0";
 static const char *RES_CAPABILITY_FANSPEED_MAIN_0 = "/capability/fanSpeed/main/0";
@@ -42,7 +52,7 @@ static const char *RES_CAPABILITY_DUSTSENSOR_MAIN_0 = "/capability/dustSensor/ma
 Ecore_Timer *sensor_event_timer = NULL;
 pthread_mutex_t  mutex_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool g_switch_status;
-static uint32_t g_fan_speed = FAN_SPEED_LOW;
+static uint32_t g_fan_speed = FAN_SPEED_OFF;
 
 #define MUTEX_LOCK		pthread_mutex_lock(&mutex_lock)
 #define MUTEX_UNLOCK	pthread_mutex_unlock(&mutex_lock)
@@ -117,17 +127,11 @@ void get_fan_speed(uint32_t *fan_speed)
  * dust sensor data set
  * PM2.5 level
  *  0 ~ 15 ug/m3 : Good
- * 16 ~ 35 ug/m3 : Moderate
- * 36 ~ 75 ug/m3 : Poor
- * 76 ~    ug/m3 : Very Poor
+ * 16 ~ 25 ug/m3 : Moderate
+ * 26 ~ 50 ug/m3 : Poor
+ * 51 ~    ug/m3 : Very Poor
  *
- * PM10 level
- *  0 ~ 30  ug/m3 : Good
- * 31 ~ 80  ug/m3 : Moderate
- * 81 ~ 150 ug/m3 : Poor
- * 151 ~    ug/m3 : Very Poor
  */
-
 void set_sensor_value(_pms7003_protocol_t pms7003_protocol)
 {
 	uint32_t pm1_0, pm2_5, pm10;
@@ -147,16 +151,34 @@ void set_sensor_value(_pms7003_protocol_t pms7003_protocol)
 	 */
 
 	get_fan_speed(&fan_speed);
-	// setting fan speed (Auto)
-	if (fan_speed >= 0x11 && fan_speed >= 0x14) {
-		if ((pm10 >= 76) && (fan_speed != FAN_SPEED_MAX))
-			set_fan_speed(FAN_SPEED_MAX);
-		else if ((pm10 <= 75) && (pm10 >= 36) && (fan_speed != FAN_SPEED_HIGH))
+	if (fan_speed <= MANUAL_FAN_SPEED_HIGH) {
+		INFO("current fan speed = [0x%x]", fan_speed);
+		INFO("Manual fan speed setting is enabled, do nothing");
+	} else if (fan_speed >= FAN_SPEED_OFF && fan_speed <= FAN_SPEED_HIGH) {
+		// setting fan speed (Auto)
+		/*
+		 * fine dust sensor and fan speed data set
+		 * PM2.5    ~15     ~25     ~50     51~
+		 *          GOOD    NORMAL  POOR    VERY POOR
+		 * fan      OFF     LOW     MEDIUM  HIGH
+		 * manual   0x01    0x02    0x03    0x04
+		 * auto     0x11    0x12    0x13    0x14
+		 *
+		 */
+
+		if ((pm2_5 > FINEDUST_LEVEL_PM2_5_POOR) && (fan_speed != FAN_SPEED_HIGH))
 			set_fan_speed(FAN_SPEED_HIGH);
-		else if ((pm10 <= 35) && (pm10 >= 16) && (fan_speed != FAN_SPEED_MEDIUM))
+		else if (((pm2_5 <= FINEDUST_LEVEL_PM2_5_POOR) && (pm2_5 > FINEDUST_LEVEL_PM2_5_NORMAL))
+				&& (fan_speed != FAN_SPEED_MEDIUM))
 			set_fan_speed(FAN_SPEED_MEDIUM);
-		else if ((pm10 <= 15) && (fan_speed != FAN_SPEED_LOW))
+		else if (((pm2_5 <= FINEDUST_LEVEL_PM2_5_NORMAL) && (pm2_5 > FINEDUST_LEVEL_PM2_5_GOOD))
+				&& (fan_speed != FAN_SPEED_LOW))
 			set_fan_speed(FAN_SPEED_LOW);
+		else if ((pm2_5 <= FINEDUST_LEVEL_PM2_5_GOOD)
+				&& (fan_speed != FAN_SPEED_OFF))
+			set_fan_speed(FAN_SPEED_OFF);
+
+		INFO("current fan speed = [0x%x]", fan_speed);
 	}
 
 #ifdef _DEBUG_PRINT_
