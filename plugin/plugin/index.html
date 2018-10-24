@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Air Purifier</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!-- Stylesheet-->
+		<link rel="stylesheet" type="text/css" href="css/style-pm.css"/>
+
+		<!-- SAMSUNG CONNECT API -->
+		<script type="text/javascript" src="lib/SCPluginApi.js"></script>
+		<script type="text/javascript" src="js/capability_switch.js"></script>
+		<script type="text/javascript" src="js/capability_dustSensor.js"></script>
+		<script type="text/javascript" src="js/capability_fanSpeed.js"></script>
+		<script type="text/javascript" src="js/index.js"></script>
+	</head>
+	<body>
+		<!-- Action bar-->
+		<div id="action_bar">
+			<span id="action_bar_back_button" onclick="backAction()">
+				<img src="res/board_ic_arrow_left.png" style="width: 100%; height:auto;" id="icon_back"/>
+			</span>
+			<span id="action_bar_title">
+				<div id="action_bar_title_sub" class="roboto-condensed-bold">HOME - LIVING ROOM</div>
+				<div id="action_bar_title_main" class="roboto-condensed-bold">PM2.5 MEASURE</div>
+			</span>
+			<span id="action_bar_more">
+			</span>
+		</div>
+		<div class="row-custom">
+			<div class="left-col">
+				<!-- Header-->
+				<div id="header_bar">
+					<div id="power_icon_back_circle" onclick="onPowerBtnClicked()">
+						<img class="svg-class"src="res/ic_power.svg">
+					</div>
+				</div>
+				<div id="combo_area" align="center">
+					<div class="title_bar title_bar_text roboto-condensed-bold" style="line-height:32px">PM2.5 Measure</div>
+				</div>
+				<div class="status_sub_bar roboto-condensed-regular">INDOOR</div>
+				<!-- air quality circle area-->
+				<div id="pm25_measure" class="roboto-condensed-regular">
+					<img id="pm25_status_back" src="res/pm25-good.png">
+					<div id="pm25_measure_text">
+						<span class="pm25_value_area roboto-condensed-bold" id="fineDustLevel">50</span>
+						<span class="pm25_unit_area roboto-regular">ug/m<sup>3</sup></span>
+						<p class="pm25_title_area roboto-regular">PM2.5 Measure</p>
+					</div>
+				</div>
+
+				<!-- status notice bar -->
+				<div class="status-container">
+					<table class="roboto-regular" align="center">
+						<tr>
+							<th class="cyan_back"></th>
+							<th class="green_back"></th>
+							<th class="orange_back"></th>
+							<th class="red_back"></th>
+						</tr>
+						<tr>
+							<td class="status_note">good</td>
+							<td class="status_note">normal</td>
+							<td class="status_note">poor</td>
+							<td class="status_note">very poor</td>
+						</tr>
+					</table>
+				</div><!-- status notice bar -->
+				<div class="airPurifier_control_container roboto-condensed-regular" align="center">
+					<div class="air_purifier_title">Air Purifier</div>
+					<!-- high/midium/low/sleep button set area -->
+					<div class="set_button_container">
+						<!-- fan speed combo area-->
+						<select id="comboFanSpeed" class="select_bar select_bar_text margin" onchange="onSelectFanSpeed(this)">
+							<option value="Sleep">Sleep</option>
+							<option value="Low">Low</option>
+							<option value="Medium">Medium</option>
+							<option value="High">High</option>
+						</select>
+					<div class="button_bar auto_set margin" id="fan_speed_auto" onclick="onSetFanAutoClicked()">AUTO OFF</div>
+					</div>
+					<div class="descript_container">
+						<div class="air_purifier_desc_item">FanSpeedControl </div>
+						<div class="air_purifier_desc_item">AutoControl</div>
+						<div class="desc_bar">
+							<strong>AUTO</strong> | Auto Run under air condition
+						</div> <!-- status bar -->
+					</div>
+				</div> <!-- air_purifier_control_wrap -->
+
+			</div>
+		</div> <!-- end of row-custom -->
+	</body>
+</html>

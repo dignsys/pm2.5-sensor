@@ -1,0 +1,452 @@
+{
+  "n": "pm25",
+  "version": "0.0.1",
+  "vid": "",
+  "mnmn": "",
+  "language": [
+    {
+      "locale": "en_US",
+      "version": "0.0.1",
+      "poCodes": [
+        {
+          "label": "Dust Sensor Level",
+          "po": "___PO_CODE_DUSTSENSOR_STATE"
+        },
+        {
+          "po": "___PO_CODE_POWERSWITCH_ON",
+          "label": "On"
+        },
+        {
+          "po": "___PO_CODE_POWERSWITCH_OFF",
+          "label": "Off"
+        },
+        {
+          "po": "___PO_CODE_POWERSWITCH",
+          "label": "Power"
+        },
+        {
+          "label": "Fan Speed",
+          "po": "___PO_CODE_FANSPEED_FANSPEED"
+        },
+        {
+          "label": "Low",
+          "po": "___PO_CODE_FANSPEED_LOW"
+        },
+        {
+          "label": "Medium",
+          "po": "___PO_CODE_FANSPEED_MEDIUM"
+        },
+        {
+          "label": "High",
+          "po": "___PO_CODE_FANSPEED_HIGH"
+        },
+        {
+          "label": "Max",
+          "po": "___PO_CODE_FANSPEED_MAX"
+        }
+      ],
+      "mnmn": "",
+      "vid": ""
+    }
+  ],
+  "ma": [
+    {
+      "name": "PowerSwitch",
+      "type": "main",
+      "order": 1,
+      "link": {
+        "href": "/capability/switch/main/0",
+        "if": "oic.if.a",
+        "rt": "x.com.st.powerswitch"
+      },
+      "iconUrl": {
+        "vector": "",
+        "small": "",
+        "large": "",
+        "mid": "icon://ic_function_power_switch"
+      },
+      "property": "power",
+      "controlType": "ToggleSwitch",
+      "alternatives": [
+        {
+          "key": "on",
+          "value": "___PO_CODE_POWERSWITCH_ON"
+        },
+        {
+          "key": "off",
+          "value": "___PO_CODE_POWERSWITCH_OFF",
+          "type": "inactive"
+        }
+      ],
+      "step": 0,
+      "label": {
+        "label": "___PO_CODE_POWERSWITCH"
+      },
+      "emphasis": false
+    }
+  ],
+  "ms": [
+    {
+      "name": "PowerSwitch",
+      "type": "device",
+      "order": 1,
+      "label": {
+        "label": "<var1>",
+        "arguments": [
+          {
+            "n": "var1",
+            "href": "/capability/switch/main/0",
+            "property": "power",
+            "valueType": null,
+            "alternatives": [
+              {
+                "key": "on",
+                "value": "___PO_CODE_POWERSWITCH_ON"
+              },
+              {
+                "key": "off",
+                "value": "___PO_CODE_POWERSWITCH_OFF",
+                "type": "inactive"
+              }
+            ]
+          }
+        ]
+      },
+      "emphasis": false
+    }
+  ],
+  "dpInfo": [
+    {
+      "os": "android",
+      "dpType": "vendorPlugIn",
+      "dpUri": "wwst://pm25sensor"
+    },
+    {
+      "os": "ios",
+      "dpType": "vendorPlugIn",
+      "dpUri": "wwst://pm25sensor"
+    }
+  ],
+  "dpResources": [
+    {
+      "emphasis": false,
+      "ruleEvent": false,
+      "order": 1,
+      "step": 0,
+      "property": "fineDustLevel",
+      "controlType": "List",
+      "iconUrl": {
+        "vector": "",
+        "mid": "icon://ic_function_dust_sensor_level",
+        "large": "",
+        "small": ""
+      },
+      "name": "Dust Sensor",
+      "controllable": false,
+      "link": {
+        "href": "/capability/dustSensor/main/0",
+        "if": "oic.if.s",
+        "rt": "x.com.st.dustlevel"
+      },
+      "label": {
+        "n": "ST Dust Sensor Level Resource",
+        "label": "PM 2.5"
+      },
+      "alternatives": [],
+      "ruleAction": false
+    },
+    {
+      "emphasis": false,
+      "ruleEvent": true,
+      "order": 2,
+      "step": 0,
+      "property": "fineDustLevel",
+      "controlType": "List",
+      "iconUrl": {
+        "vector": "",
+        "mid": "icon://ic_function_dust_sensor_level",
+        "large": "",
+        "small": ""
+      },
+      "name": "Dust Sensor",
+      "controllable": false,
+      "link": {
+        "href": "/capability/dustSensor/main/0",
+        "if": "oic.if.s",
+        "rt": "x.com.st.dustlevel"
+      },
+      "label": {
+        "n": "ST Dust Sensor Level Resource",
+        "label": "PM 2.5"
+      },
+      "alternatives": [],
+      "ruleAction": false
+    },
+    {
+      "emphasis": false,
+      "ruleEvent": false,
+      "order": 3,
+      "step": 0,
+      "property": "dustLevel",
+      "controlType": "List",
+      "iconUrl": {
+        "vector": "",
+        "mid": "icon://ic_function_dust_sensor_level",
+        "large": "",
+        "small": ""
+      },
+      "name": "Dust Sensor",
+      "controllable": false,
+      "link": {
+        "href": "/capability/dustSensor/main/0",
+        "if": "oic.if.s",
+        "rt": "x.com.st.dustlevel"
+      },
+      "label": {
+        "n": "ST Dust Sensor Level Resource",
+        "label": "PM 10"
+      },
+      "alternatives": [],
+      "ruleAction": false
+    },
+    {
+      "emphasis": false,
+      "ruleEvent": true,
+      "order": 4,
+      "step": 0,
+      "property": "dustLevel",
+      "controlType": "List",
+      "iconUrl": {
+        "vector": "",
+        "mid": "icon://ic_function_dust_sensor_level",
+        "large": "",
+        "small": ""
+      },
+      "name": "Dust Sensor",
+      "controllable": false,
+      "link": {
+        "href": "/capability/dustSensor/main/0",
+        "if": "oic.if.s",
+        "rt": "x.com.st.dustlevel"
+      },
+      "label": {
+        "n": "ST Dust Sensor Level Resource",
+        "label": "PM 10"
+      },
+      "alternatives": [],
+      "ruleAction": false
+    },
+    {
+      "name": "PowerSwitch",
+      "controllable": true,
+      "order": 5,
+      "link": {
+        "href": "/capability/switch/main/0",
+        "if": "oic.if.a",
+        "rt": "x.com.st.powerswitch"
+      },
+      "iconUrl": {
+        "vector": "",
+        "small": "",
+        "large": "",
+        "mid": "icon://ic_function_power_switch"
+      },
+      "property": "power",
+      "controlType": "ToggleSwitch",
+      "alternatives": [
+        {
+          "key": "on",
+          "value": "___PO_CODE_POWERSWITCH_ON"
+        },
+        {
+          "key": "off",
+          "value": "___PO_CODE_POWERSWITCH_OFF",
+          "type": "inactive"
+        }
+      ],
+      "step": 0,
+      "label": {
+        "label": "___PO_CODE_POWERSWITCH"
+      },
+      "emphasis": true,
+      "ruleEvent": false,
+      "ruleAction": true
+    },
+    {
+      "name": "PowerSwitch",
+      "controllable": true,
+      "order": 6,
+      "link": {
+        "href": "/capability/switch/main/0",
+        "if": "oic.if.a",
+        "rt": "x.com.st.powerswitch"
+      },
+      "iconUrl": {
+        "vector": "",
+        "small": "",
+        "large": "",
+        "mid": "icon://ic_function_power_switch"
+      },
+      "property": "power",
+      "controlType": "ToggleSwitch",
+      "alternatives": [
+        {
+          "key": "on",
+          "value": "___PO_CODE_POWERSWITCH_ON"
+        },
+        {
+          "key": "off",
+          "value": "___PO_CODE_POWERSWITCH_OFF",
+          "type": "inactive"
+        }
+      ],
+      "step": 0,
+      "label": {
+        "label": "___PO_CODE_POWERSWITCH"
+      },
+      "emphasis": true,
+      "ruleEvent": false,
+      "ruleAction": false
+    },
+    {
+      "name": "PowerSwitch",
+      "controllable": true,
+      "order": 7,
+      "link": {
+        "href": "/capability/switch/main/0",
+        "if": "oic.if.a",
+        "rt": "x.com.st.powerswitch"
+      },
+      "iconUrl": {
+        "vector": "",
+        "small": "",
+        "large": "",
+        "mid": "icon://ic_function_power_switch"
+      },
+      "property": "power",
+      "controlType": "ToggleSwitch",
+      "alternatives": [
+        {
+          "key": "on",
+          "value": "___PO_CODE_POWERSWITCH_ON"
+        },
+        {
+          "key": "off",
+          "value": "___PO_CODE_POWERSWITCH_OFF",
+          "type": "inactive"
+        }
+      ],
+      "step": 0,
+      "label": {
+        "label": "___PO_CODE_POWERSWITCH"
+      },
+      "emphasis": true,
+      "ruleEvent": true,
+      "ruleAction": false
+    },
+    {
+      "ruleAction": true,
+      "controllable": true,
+      "range": [
+        1,
+        4
+      ],
+      "link": {
+        "rt": "x.com.st.fanspeed",
+        "href": "/capability/fanSpeed/main/0",
+        "if": "oic.if.a"
+      },
+      "step": 0,
+      "controlType": "List",
+      "name": "Fan Speed",
+      "label": {
+        "label": "___PO_CODE_FANSPEED_FANSPEED",
+        "n": "st fan speed resource"
+      },
+      "emphasis": false,
+      "ruleEvent": false,
+      "iconUrl": {
+        "mid": "icon://ic_function_fan_speed",
+        "large": "",
+        "small": "",
+        "vector": ""
+      },
+      "alternatives": [
+        {
+          "key": "1",
+          "value": "___PO_CODE_FANSPEED_LOW",
+          "type": "active"
+        },
+        {
+          "key": "2",
+          "value": "___PO_CODE_FANSPEED_MEDIUM",
+          "type": "active"
+        },
+        {
+          "key": "3",
+          "value": "___PO_CODE_FANSPEED_HIGH",
+          "type": "active"
+        },
+        {
+          "key": "4",
+          "value": "___PO_CODE_FANSPEED_MAX",
+          "type": "active"
+        }
+      ],
+      "order": 8,
+      "property": "fanSpeed"
+    },
+    {
+      "ruleAction": false,
+      "controllable": true,
+      "range": [
+        1,
+        4
+      ],
+      "link": {
+        "rt": "x.com.st.fanspeed",
+        "href": "/capability/fanSpeed/main/0",
+        "if": "oic.if.a"
+      },
+      "step": 0,
+      "controlType": "List",
+      "name": "Fan Speed",
+      "label": {
+        "label": "___PO_CODE_FANSPEED_FANSPEED",
+        "n": "st fan speed resource"
+      },
+      "emphasis": false,
+      "ruleEvent": false,
+      "iconUrl": {
+        "mid": "icon://ic_function_fan_speed",
+        "large": "",
+        "small": "",
+        "vector": ""
+      },
+      "alternatives": [
+        {
+          "key": "1",
+          "value": "___PO_CODE_FANSPEED_LOW",
+          "type": "active"
+        },
+        {
+          "key": "2",
+          "value": "___PO_CODE_FANSPEED_MEDIUM",
+          "type": "active"
+        },
+        {
+          "key": "3",
+          "value": "___PO_CODE_FANSPEED_HIGH",
+          "type": "active"
+        },
+        {
+          "key": "4",
+          "value": "___PO_CODE_FANSPEED_MAX",
+          "type": "active"
+        }
+      ],
+      "order": 9,
+      "property": "fanSpeed"
+    }
+  ]
+}

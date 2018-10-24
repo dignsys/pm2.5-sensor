@@ -1,0 +1,24 @@
+{
+  "name": "pm25",
+  "components": [
+    {
+      "id": "main",
+      "capabilities": [
+        {
+          "id": "dustSensor"
+        },
+        {
+          "id": "fanSpeed"
+        },
+        {
+          "id": "switch"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "mnmn": "",
+    "vid": "pm25sensor",
+    "deviceType": "AirPurifier"
+  }
+}
